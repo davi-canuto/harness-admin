@@ -49,6 +49,10 @@ harness -p 3001                            # custom port
 harness --config ./harness.config.json     # custom config
 ```
 
+### Terminal UI
+
+![Harness TUI](docs/tui.gif)
+
 ---
 
 ## How it works
