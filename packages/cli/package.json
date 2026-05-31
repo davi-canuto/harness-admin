@@ -1,6 +1,6 @@
 {
   "name": "harness-admin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A local dashboard for Specification-Driven Development projects",
   "type": "module",
   "bin": {
@@ -22,7 +22,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davicanuto/harness-admin.git"
+    "url": "git+https://github.com/davi-canuto/harness-admin.git"
   },
   "scripts": {
     "build": "pnpm --filter @harness/board build && pnpm --filter @harness/server build && pnpm --filter @harness/tui build && pnpm --filter @harness/parser build && tsup && rm -rf ./board-dist && cp -r ../board/dist ./board-dist",

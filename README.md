@@ -184,7 +184,7 @@ packages/
 ## Contributing
 
 ```bash
-git clone https://github.com/davicanuto/harness-admin
+git clone https://github.com/davi-canuto/harness-admin
 cd harness-admin
 pnpm install
 pnpm build
