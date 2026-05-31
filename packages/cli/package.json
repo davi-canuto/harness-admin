@@ -1,0 +1,27 @@
+{
+  "name": "@harness/board",
+  "version": "0.0.1",
+  "type": "module",
+  "bin": {
+    "harness": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@harness/server": "workspace:*",
+    "@harness/tui": "workspace:*",
+    "open": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
+  }
+}
