@@ -135,8 +135,7 @@ A project switcher appears in the sidebar. "All projects" shows a merged view wi
 
 - [ ] **Claude integration** — chat with `proposal.md` + `design.md` + `tasks.md` pre-loaded
 - [ ] **Apply by task** — delegate a specific task to Claude Code from the UI
-- [ ] **New change** — create a spec with AI-generated proposal, design and tasks from a description
-- [ ] **Multi-repo improvements** — per-project config, consolidated metrics
+- [ ] **Multi-repo improvements** — per-project config overrides, consolidated metrics across projects
 
 ---
 
