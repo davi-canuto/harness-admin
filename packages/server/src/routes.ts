@@ -71,10 +71,14 @@ export function registerRoutes(
     if (change.status === "archived") return reply.status(400).send({ error: "Already archived" });
 
     const archivePath = resolve(join(rootDir, config.archiveDir));
-    const targetPath = join(archivePath, change.name);
+
+    // follow opsx:archive naming convention: YYYY-MM-DD-change-name
+    const today = new Date().toISOString().slice(0, 10); // "2026-05-31"
+    const archivedName = `${today}-${change.name}`;
+    const targetPath = join(archivePath, archivedName);
 
     if (existsSync(targetPath)) {
-      return reply.status(409).send({ error: `A change named "${change.name}" already exists in archive` });
+      return reply.status(409).send({ error: `"${archivedName}" already exists in archive` });
     }
 
     try {
