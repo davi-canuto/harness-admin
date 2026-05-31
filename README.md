@@ -6,6 +6,30 @@
 
 A local dashboard for Specification-Driven Development projects.
 
+```bash
+npx harness-admin
+```
+
+---
+
+## Why
+
+You have 20 specs in flight. Some are done, some are stuck in backlog, a few are actively being worked on — but to know which is which you have to open each directory and read through the files.
+
+Harness reads your `changes/` directory and gives you a real-time visual of every spec: grouped by status, task-level progress, archive actions — updated live as you work.
+
+---
+
+## Demo
+
+![Harness demo](docs/demo.gif)
+
+---
+
+## Screenshot
+
+![Harness board](docs/board.png)
+
 ---
 
 ## Quick Start
@@ -15,145 +39,67 @@ cd your-project
 npx harness-admin
 ```
 
-Opens the board at `http://localhost:3000`. Your browser opens automatically.
+Opens at `http://localhost:3000`. Browser launches automatically.
 
 ```bash
-npx harness-admin --tui    # stay in the terminal
-npx harness-admin -p 3001  # use a different port
+npx harness-admin --tui    # terminal UI
+npx harness-admin -p 3001  # custom port
 ```
 
 **Requires Node.js 18+**
 
 ---
 
-## Why Harness
-
-You have 20 specs in flight. Some are done, some are stuck in backlog, a few are actively being worked on — but to know which is which you have to open each directory and read through the files.
-
-Harness reads your `changes/` directory and gives you a real-time visual of every spec: grouped by status, with task-level progress, updated live as you work.
-
----
-
-## Screenshots
-
-### Browser
-
-![Harness demo](docs/demo.gif)
-
-![Harness board](docs/board.png)
-
-*Sidebar grouped by status · resizable panel · task-level progress · live updates over WebSocket*
-
-### Terminal
-
-```
- HARNESS                      ┌────────────────────────────────────────────────┐
-                              │  community-youtube-videos  [ in progress ]      │
- ── IN PROGRESS (3) ──        │                                                 │
- ▶ community-youtube-videos   │  █████████████████████░░░░░░  13/18  72%       │
-   landing-page               │                                                 │
-   openpix-pix-payment        │  Tasks                                          │
-                              │   ✓  1. Create youtube.ts with fetch helper     │
- ── BACKLOG (3) ──            │   ✓  2. Define YouTubeVideo type                │
-   content-recommendations    │   ✓  3. Read env vars                           │
-   purchase-confirmation      │   ○  4. Document variables in .env.example      │
-   stripe-connect             │   ○  5. Configure API key in staging            │
-                              │                                                 │
- ── DONE (28) ──              │  proposal.md  design.md  tasks.md               │
-   admin-booking-management   │                                                 │
-   ...                        └─────────────────────────────────────────────────┘
-                              ┌─────────────────────────────────────────────────┐
- ── ARCHIVED (24) ▸           │  ↑↓/jk move · a toggle archived · q quit        │
-                              └─────────────────────────────────────────────────┘
-```
-
-*Grouped sections · ASCII progress bar · keyboard navigation · no server required*
-
----
-
-## Installation
-
-**Run without installing:**
-
-```bash
-npx harness-admin
-```
-
-**Install globally:**
-
-```bash
-npm install -g harness-admin
-harness
-```
-
-**Install as a dev dependency:**
-
-```bash
-npm install -D harness-admin
-```
-
-```json
-{
-  "scripts": {
-    "board": "harness"
-  }
-}
-```
-
----
-
 ## Usage
 
 ```bash
-harness                                    # browser dashboard (default)
+harness                                    # browser dashboard
 harness --tui                              # terminal UI
 harness -p 3001                            # custom port
-harness --config ./harness.config.json     # custom config file
+harness --config ./harness.config.json     # custom config
 ```
 
 ---
 
 ## How it works
 
-Harness scans `openspec/changes/` for subdirectories. Each subdirectory is a **change** — a unit of work with a `tasks.md` checklist. Status is derived automatically:
+Harness scans `openspec/changes/` for subdirectories. Each one is a **change** — a unit of work tracked by a `tasks.md` checklist. Status is derived automatically:
 
 | Status | Condition |
 |---|---|
-| `in progress` | at least one `[x]` and at least one `[ ]` task |
-| `done` | every task marked `[x]` |
-| `backlog` | no `tasks.md`, or no tasks checked yet |
-| `archived` | lives inside the archive directory |
+| `in progress` | at least one `[x]` and at least one `[ ]` |
+| `done` | all tasks `[x]` |
+| `backlog` | no `tasks.md` or zero checked tasks |
+| `archived` | path is inside the archive directory |
 
-The file system is the source of truth. Harness watches it with `chokidar` and pushes updates to the browser over WebSocket — no manual refresh needed.
+The filesystem is the source of truth. Changes are watched via `chokidar` and pushed to the browser over WebSocket — no refresh needed.
 
 ---
 
 ## Directory convention
-
-Harness works with any project that follows this shape:
 
 ```
 your-project/
 └── openspec/
     └── changes/
         ├── my-feature/
-        │   ├── proposal.md   ← what and why
-        │   ├── design.md     ← how
-        │   └── tasks.md      ← [ ] / [x] checklist
+        │   ├── proposal.md
+        │   ├── design.md
+        │   └── tasks.md
         └── archive/
             └── shipped-feature/
                 └── tasks.md
 ```
 
-No framework required. Works with [OpenSpec](https://github.com/davi-canuto/openspec), hand-rolled SDD workflows, or anything that follows this layout.
+Works with any project that follows this shape — no framework required. Compatible with [OpenSpec](https://github.com/davi-canuto/openspec) and any hand-rolled SDD workflow.
 
-**Nested changes** are also supported — a parent directory without its own `tasks.md` but with sub-directories that have one becomes a grouped entry with aggregated progress.
+**Nested changes** are supported — a parent directory without its own `tasks.md` but with sub-directories that have one becomes a group with aggregated progress.
 
 ---
 
 ## Configuration
 
-Zero config needed for OpenSpec projects. To customize, create `harness.config.json` at your project root:
+Zero config for OpenSpec projects. To customize, create `harness.config.json` at your project root:
 
 ```json
 {
@@ -166,7 +112,41 @@ Zero config needed for OpenSpec projects. To customize, create `harness.config.j
 }
 ```
 
-All fields are optional — the values above are the defaults.
+### Multi-repo
+
+Point Harness at multiple projects simultaneously:
+
+```json
+{
+  "projects": [
+    { "name": "frontend", "path": "/path/to/frontend" },
+    { "name": "api",      "path": "/path/to/api" }
+  ]
+}
+```
+
+A project switcher appears in the sidebar. "All projects" shows a merged view with project badges on each change.
+
+---
+
+## Features
+
+- **Grouped sidebar** — changes organized by status with collapsible sections
+- **Live updates** — WebSocket pushes filesystem changes to the browser instantly
+- **Archive from the board** — move a change to archive without touching the terminal
+- **Terminal UI** — full `--tui` mode with keyboard navigation (`↑↓/jk`, `a`, `q`)
+- **Resizable sidebar** — drag the edge to fit your screen
+- **Nested changes** — parent changes aggregate progress across sub-changes
+- **Multi-repo** — monitor multiple projects from a single dashboard
+
+---
+
+## Roadmap
+
+- [ ] **Claude integration** — chat with `proposal.md` + `design.md` + `tasks.md` pre-loaded
+- [ ] **Apply by task** — delegate a specific task to Claude Code from the UI
+- [ ] **New change** — create a spec with AI-generated proposal, design and tasks from a description
+- [ ] **Multi-repo improvements** — per-project config, consolidated metrics
 
 ---
 
@@ -174,22 +154,12 @@ All fields are optional — the values above are the defaults.
 
 ```
 packages/
-├── parser/   Reads the filesystem, parses tasks.md, classifies status, watches for changes
-├── server/   Local Fastify server — GET /api/changes, WebSocket /ws, serves the board SPA
-├── board/    Browser dashboard — Vite + React + Tailwind CSS
-├── tui/      Terminal UI — Ink + React, reads filesystem directly
-└── cli/      Entry point published to npm — wires everything together
+├── parser/   Filesystem reader, task parser, status classifier, chokidar watcher
+├── server/   Fastify server — REST API, WebSocket, static file serving
+├── board/    Browser SPA — Vite + React + Tailwind CSS
+├── tui/      Terminal UI — Ink + React
+└── cli/      npm entry point — wires everything together
 ```
-
----
-
-## Roadmap
-
-- [ ] **Archive action** — archive a change directly from the board without touching the CLI
-- [ ] **Claude integration** — open a chat with `proposal.md` + `design.md` + `tasks.md` pre-loaded as context
-- [ ] **Apply by task** — delegate a specific task to Claude from the UI
-- [ ] **Multi-repo dashboard** — point to multiple projects and see a consolidated view
-- [ ] **SDD actions in UI** — run `/propose`, `/apply`, `/archive` without leaving the browser
 
 ---
 
@@ -202,19 +172,19 @@ pnpm install
 pnpm build
 ```
 
-To develop against a local project:
+Development against a local project:
 
 ```bash
-# Terminal 1 — start the API server pointing at your project
+# Terminal 1 — API server
 cd /path/to/your-project
 node /path/to/harness-admin/packages/cli/dist/index.js
 
-# Terminal 2 — start the board dev server with hot reload
+# Terminal 2 — board with hot reload
 cd /path/to/harness-admin/packages/board
 pnpm dev
 ```
 
-Every change to Harness itself goes through an OpenSpec change in `openspec/changes/`. See `AGENTS.md` for the workflow.
+Every change to Harness goes through an OpenSpec change in `openspec/changes/`. See `AGENTS.md` for the workflow.
 
 ---
 
