@@ -18,20 +18,6 @@ You have 20 specs in flight. Some are done, some are stuck in backlog, a few are
 
 Harness reads your `changes/` directory and gives you a real-time visual of every spec: grouped by status, task-level progress, archive actions — updated live as you work.
 
----
-
-## Demo
-
-![Harness demo](docs/demo.gif)
-
----
-
-## Screenshot
-
-![Harness board](docs/board.png)
-
----
-
 ## Quick Start
 
 ```bash
@@ -191,3 +177,7 @@ Every change to Harness goes through an OpenSpec change in `openspec/changes/`. 
 ## License
 
 MIT
+
+---
+
+![Harness board](docs/board.png)
