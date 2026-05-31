@@ -12,10 +12,14 @@ const tui = args.includes("--tui");
 const configFlag = args.indexOf("--config");
 const configPath = configFlag !== -1 ? args[configFlag + 1] : undefined;
 
-const config = loadConfig(configPath);
-const rootDir = process.cwd();
+// -p / --port flag overrides config
+const portFlag = args.indexOf("--port") !== -1 ? args.indexOf("--port") : args.indexOf("-p");
+const portOverride = portFlag !== -1 ? Number(args[portFlag + 1]) : undefined;
 
-// board-dist ships alongside dist/ in the published package
+const config = loadConfig(configPath);
+if (portOverride && !isNaN(portOverride)) config.port = portOverride;
+
+const rootDir = process.cwd();
 const boardDist = resolve(__dirname, "../board-dist");
 
 async function main() {
@@ -34,6 +38,12 @@ async function main() {
 }
 
 main().catch((err) => {
+  if ((err as NodeJS.ErrnoException).code === "EADDRINUSE") {
+    console.error(`\n  Port ${config.port} is already in use.\n`);
+    console.error(`  Run on a different port:\n`);
+    console.error(`    npx harness-admin -p 3001\n`);
+    process.exit(1);
+  }
   console.error(err);
   process.exit(1);
 });
