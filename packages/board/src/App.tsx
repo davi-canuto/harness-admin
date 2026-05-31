@@ -2,12 +2,19 @@ import { useState } from "react";
 import { useChanges } from "./hooks/useChanges.ts";
 import { Sidebar } from "./components/Sidebar.tsx";
 import { ChangeDetail } from "./components/ChangeDetail.tsx";
+import { EmptyState } from "./components/EmptyState.tsx";
+import type { Status } from "./types.ts";
 
 export default function App() {
   const { changes, loading, error } = useChanges();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const selected = changes.find((c) => c.id === selectedId) ?? null;
+
+  const counts: Record<Status, number> = {
+    backlog: 0, in_progress: 0, done: 0, archived: 0,
+  };
+  for (const c of changes) counts[c.status]++;
 
   if (loading) {
     return (
@@ -32,9 +39,7 @@ export default function App() {
         {selected ? (
           <ChangeDetail change={selected} />
         ) : (
-          <div className="flex items-center justify-center h-full text-zinc-600 text-sm">
-            Select a change
-          </div>
+          <EmptyState counts={counts} />
         )}
       </main>
     </div>
