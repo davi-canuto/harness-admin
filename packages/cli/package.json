@@ -1,6 +1,6 @@
 {
   "name": "harness-admin",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A local dashboard for Specification-Driven Development projects",
   "type": "module",
   "bin": {
@@ -52,8 +52,12 @@
     "tsup": "^8.0.2",
     "typescript": "^5.4.5"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "files": [
     "dist",
-    "board-dist"
+    "board-dist",
+    "README.md"
   ]
 }

@@ -1,18 +1,44 @@
-# Harness
+# harness-admin
 
-**A local dashboard for projects that use Specification-Driven Development.**
+[![npm](https://img.shields.io/npm/v/harness-admin?color=3b82f6&label=npm)](https://www.npmjs.com/package/harness-admin)
+[![license](https://img.shields.io/npm/l/harness-admin?color=22d3ee)](LICENSE)
+[![node](https://img.shields.io/node/v/harness-admin?color=4ade80&label=node)](https://nodejs.org)
 
-Harness reads your `changes/` directory and shows you a real-time view of every spec — what's in progress, what's waiting, what's done. No database, no cloud, no setup.
+A local dashboard for Specification-Driven Development projects.
+
+---
+
+## Quick Start
 
 ```bash
+cd your-project
 npx harness-admin
 ```
+
+Opens the board at `http://localhost:3000`. Your browser opens automatically.
+
+```bash
+npx harness-admin --tui    # stay in the terminal
+npx harness-admin -p 3001  # use a different port
+```
+
+**Requires Node.js 18+**
+
+---
+
+## Why Harness
+
+You have 20 specs in flight. Some are done, some are stuck in backlog, a few are actively being worked on — but to know which is which you have to open each directory and read through the files.
+
+Harness reads your `changes/` directory and gives you a real-time visual of every spec: grouped by status, with task-level progress, updated live as you work.
 
 ---
 
 ## Screenshots
 
 ### Browser
+
+![Harness demo](docs/demo.gif)
 
 ![Harness board](docs/board.png)
 
@@ -79,26 +105,10 @@ npm install -D harness-admin
 ## Usage
 
 ```bash
-# Open the browser dashboard (default)
-harness
-
-# Open the terminal UI instead
-harness --tui
-
-# Use a custom config file
-harness --config ./harness.config.json
-```
-
-Running `harness` starts a local server, prints the URL, and opens your browser:
-
-```
-  harness  http://localhost:3000
-```
-
-With `--tui` it stays in the terminal:
-
-```
-  harness  running at http://localhost:3000
+harness                                    # browser dashboard (default)
+harness --tui                              # terminal UI
+harness -p 3001                            # custom port
+harness --config ./harness.config.json     # custom config file
 ```
 
 ---
@@ -135,7 +145,9 @@ your-project/
                 └── tasks.md
 ```
 
-No framework required. Works with [OpenSpec](https://github.com/davicanuto/openspec), hand-rolled SDD workflows, or anything that follows this layout.
+No framework required. Works with [OpenSpec](https://github.com/davi-canuto/openspec), hand-rolled SDD workflows, or anything that follows this layout.
+
+**Nested changes** are also supported — a parent directory without its own `tasks.md` but with sub-directories that have one becomes a grouped entry with aggregated progress.
 
 ---
 
