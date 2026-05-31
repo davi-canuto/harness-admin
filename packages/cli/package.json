@@ -1,6 +1,6 @@
 {
   "name": "harness-admin",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A local dashboard for Specification-Driven Development projects",
   "type": "module",
   "bin": {
