@@ -75,7 +75,7 @@ export function Sidebar({ changes, selectedId, onSelect }: SidebarProps) {
     >
       <div className="flex flex-col h-full w-full overflow-y-auto">
         <div className="px-4 pt-4 pb-2">
-          <h1 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Harness Admin</h1>
+          <h1 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Harness</h1>
         </div>
 
         <div className="grid grid-cols-4 gap-1 px-2 pb-2 border-b border-zinc-800">

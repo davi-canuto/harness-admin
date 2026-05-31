@@ -33,7 +33,7 @@ export function ChangeList({ changes, selectedId, archivedOpen, width }: ChangeL
 
   return (
     <Box flexDirection="column" width={width} paddingX={1}>
-      <Text bold color="white">HARNESS ADMIN</Text>
+      <Text bold color="white">HARNESS</Text>
       <Text> </Text>
 
       {SECTIONS.map(({ status, label }) => {

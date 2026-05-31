@@ -1,5 +1,5 @@
 {
-  "name": "@harness/board",
+  "name": "harness",
   "version": "0.0.1",
   "type": "module",
   "bin": {

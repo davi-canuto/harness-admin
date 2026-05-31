@@ -13,12 +13,15 @@ const rootDir = process.cwd();
 async function main() {
   await startServer(rootDir, config);
 
+  const url = `http://localhost:${config.port}`;
+
   if (tui) {
-    await startTUI(`http://localhost:${config.port}`);
+    console.log(`  harness  running at ${url}\n`);
+    await startTUI(url);
   } else {
+    console.log(`\n  harness  ${url}\n`);
     const { default: open } = await import("open");
-    await open(`http://localhost:${config.port}`);
-    console.log(`Board open at http://localhost:${config.port}`);
+    await open(url);
   }
 }
 
