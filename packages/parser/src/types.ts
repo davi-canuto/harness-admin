@@ -26,6 +26,11 @@ export interface Change {
 export interface ProjectEntry {
   name: string;
   path: string;
+  changesDir?: string;
+  archiveDir?: string;
+  tasksFile?: string;
+  proposalFile?: string;
+  designFile?: string;
 }
 
 export interface Config {

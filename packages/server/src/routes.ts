@@ -32,7 +32,8 @@ export function registerRoutes(
   watchers: Watchers,
   rootDir: string,
   config: Config,
-  projects: ProjectEntry[]
+  projects: ProjectEntry[],
+  projectConfigs: Map<string, Config>
 ) {
   // GET /api/changes?project=name — single project (or default)
   app.get<{ Querystring: { project?: string } }>("/api/changes", async (request) => {
@@ -70,7 +71,11 @@ export function registerRoutes(
     if (!change) return reply.status(404).send({ error: "Change not found" });
     if (change.status === "archived") return reply.status(400).send({ error: "Already archived" });
 
-    const archivePath = resolve(join(rootDir, config.archiveDir));
+    // use the project-specific config if available
+    const projectName = change.project ?? projects[0]?.name ?? "default";
+    const effectiveConfig = projectConfigs.get(projectName) ?? config;
+    const effectiveRoot = projects.find(p => p.name === projectName)?.path ?? rootDir;
+    const archivePath = resolve(join(effectiveRoot, effectiveConfig.archiveDir));
 
     // follow opsx:archive naming convention: YYYY-MM-DD-change-name
     const today = new Date().toISOString().slice(0, 10); // "2026-05-31"

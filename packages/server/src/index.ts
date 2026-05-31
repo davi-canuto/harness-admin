@@ -21,9 +21,20 @@ export async function startServer(rootDir: string, config: Config, boardDistPath
   const eventListeners: Array<(event: WatcherEvent & { project?: string }) => void> = [];
 
   const watchers = new Map<string, ReturnType<typeof createWatcher>>();
+  const projectConfigs = new Map<string, Config>();
 
   for (const project of projects) {
-    const watcher = createWatcher(project.path, config, (event) => {
+    // merge global config with per-project overrides
+    const projectConfig: Config = {
+      ...config,
+      ...(project.changesDir  && { changesDir:  project.changesDir  }),
+      ...(project.archiveDir  && { archiveDir:  project.archiveDir  }),
+      ...(project.tasksFile   && { tasksFile:   project.tasksFile   }),
+      ...(project.proposalFile && { proposalFile: project.proposalFile }),
+      ...(project.designFile  && { designFile:  project.designFile  }),
+    };
+    projectConfigs.set(project.name, projectConfig);
+    const watcher = createWatcher(project.path, projectConfig, (event) => {
       const tagged = projects.length > 1
         ? { ...event, project: project.name }
         : event;
@@ -46,7 +57,7 @@ export async function startServer(rootDir: string, config: Config, boardDistPath
     reply.send();
   });
 
-  registerRoutes(app, watchers, rootDir, config, projects);
+  registerRoutes(app, watchers, rootDir, config, projects, projectConfigs);
   registerWebSocket(app, watchers, (cb) => eventListeners.push(cb), projects);
 
   const boardDist = boardDistPath ?? resolve(__dirname, "../../../board/dist");

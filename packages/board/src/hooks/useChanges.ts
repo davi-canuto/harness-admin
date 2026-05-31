@@ -61,8 +61,9 @@ export function useChanges(activeProject: string | null = null) {
   useEffect(() => {
     let cancelled = false;
 
-    // re-fetch via HTTP when project switches (avoids WS snapshot complexity)
+    // re-fetch via HTTP when a specific project or "all" is selected
     if (activeProject !== null) {
+      dispatch({ type: "snapshot", changes: [] }); // clear immediately on switch
       const url = activeProject === "__all__"
         ? "/api/changes/all"
         : `/api/changes?project=${encodeURIComponent(activeProject)}`;
