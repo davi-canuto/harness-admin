@@ -1,0 +1,8 @@
+{
+  "changesDir": "openspec/changes",
+  "archiveDir": "openspec/changes/archive",
+  "tasksFile": "tasks.md",
+  "proposalFile": "proposal.md",
+  "designFile": "design.md",
+  "port": 3000
+}
