@@ -1,10 +1,11 @@
 {
   "name": "harness-admin",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A local dashboard for Specification-Driven Development projects",
   "type": "module",
   "bin": {
-    "harness": "dist/index.js"
+    "harness": "./dist/index.js",
+    "harness-admin": "./dist/index.js"
   },
   "main": "./dist/index.js",
   "exports": {
