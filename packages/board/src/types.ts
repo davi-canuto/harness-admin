@@ -20,4 +20,5 @@ export interface Change {
   hasTasks: boolean;
   children?: Change[];
   isChild?: boolean;
+  project?: string;
 }

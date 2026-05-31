@@ -20,6 +20,12 @@ export interface Change {
   hasTasks: boolean;
   children?: Change[];
   isChild?: boolean;
+  project?: string;
+}
+
+export interface ProjectEntry {
+  name: string;
+  path: string;
 }
 
 export interface Config {
@@ -29,6 +35,7 @@ export interface Config {
   proposalFile: string;
   designFile: string;
   port: number;
+  projects?: ProjectEntry[];
 }
 
 export type WatcherEvent =

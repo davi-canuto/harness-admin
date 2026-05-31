@@ -3,6 +3,7 @@ import { StatusBadge } from "./StatusBadge.tsx";
 import { ProgressBar } from "./ProgressBar.tsx";
 import { TaskList } from "./TaskList.tsx";
 import { ParentDetail } from "./ParentDetail.tsx";
+import { ArchiveButton } from "./ArchiveButton.tsx";
 
 const ARTIFACTS = [
   { key: "hasProposal" as const, label: "proposal.md" },
@@ -61,6 +62,12 @@ export function ChangeDetail({ change, onSelectChild }: { change: Change; onSele
           ))}
         </div>
       </section>
+
+      {change.status !== "archived" && (
+        <section className="mt-auto pt-4 border-t border-zinc-800">
+          <ArchiveButton changeId={change.id} changeName={change.name} />
+        </section>
+      )}
     </div>
   );
 }

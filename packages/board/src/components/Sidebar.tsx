@@ -2,11 +2,15 @@ import { useState, useRef, useCallback } from "react";
 import type { Change, Status } from "../types.ts";
 import { StatCard } from "./StatCard.tsx";
 import { PlayIcon, ClockIcon, CheckIcon, ArchiveIcon, ChevronIcon } from "./icons.tsx";
+import { ProjectSwitcher } from "./ProjectSwitcher.tsx";
 
 interface SidebarProps {
   changes: Change[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  projects?: string[];
+  activeProject?: string | null;
+  onProjectChange?: (p: string | null) => void;
 }
 
 const SECTIONS: { status: Status; label: string }[] = [
@@ -44,6 +48,11 @@ function ChangeRow({
       }`}
     >
       <span className="flex-1 break-words leading-snug">{change.name}</span>
+      {change.project && (
+        <span className="text-[9px] px-1 py-0.5 rounded bg-zinc-800 text-zinc-600 shrink-0">
+          {change.project}
+        </span>
+      )}
       {change.totalTasks > 0 && (
         <span className="text-[11px] text-zinc-600 tabular-nums shrink-0">
           {change.completedTasks}/{change.totalTasks}
@@ -53,7 +62,7 @@ function ChangeRow({
   );
 }
 
-export function Sidebar({ changes, selectedId, onSelect }: SidebarProps) {
+export function Sidebar({ changes, selectedId, onSelect, projects = [], activeProject = null, onProjectChange }: SidebarProps) {
   const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [collapsed, setCollapsed] = useState<Partial<Record<Status, boolean>>>({
     archived: true,
@@ -122,8 +131,11 @@ export function Sidebar({ changes, selectedId, onSelect }: SidebarProps) {
       style={{ width }}
     >
       <div className="flex flex-col h-full w-full overflow-y-auto">
-        <div className="px-4 pt-4 pb-2">
+        <div className="px-4 pt-4 pb-2 flex items-center justify-between gap-2">
           <h1 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Harness</h1>
+          {onProjectChange && (
+            <ProjectSwitcher projects={projects} active={activeProject} onChange={onProjectChange} />
+          )}
         </div>
 
         <div className="grid grid-cols-4 gap-1 px-2 pb-2 border-b border-zinc-800">

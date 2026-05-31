@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import type { Change } from "../types.ts";
 
 type State = {
@@ -39,7 +39,18 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export function useChanges() {
+export function useProjects() {
+  const [projects, setProjects] = useState<string[]>([]);
+  useEffect(() => {
+    fetch("/api/projects")
+      .then((r) => r.json())
+      .then(setProjects)
+      .catch(() => {});
+  }, []);
+  return projects;
+}
+
+export function useChanges(activeProject: string | null = null) {
   const [state, dispatch] = useReducer(reducer, {
     changes: [],
     loading: true,
@@ -49,6 +60,18 @@ export function useChanges() {
 
   useEffect(() => {
     let cancelled = false;
+
+    // re-fetch via HTTP when project switches (avoids WS snapshot complexity)
+    if (activeProject !== null) {
+      const url = activeProject === "__all__"
+        ? "/api/changes/all"
+        : `/api/changes?project=${encodeURIComponent(activeProject)}`;
+      fetch(url)
+        .then((r) => r.json())
+        .then((changes) => dispatch({ type: "snapshot", changes }))
+        .catch(() => dispatch({ type: "error", message: "Failed to load changes" }));
+      return;
+    }
 
     function connect() {
       if (cancelled) return;
@@ -74,7 +97,7 @@ export function useChanges() {
       cancelled = true;
       wsRef.current?.close();
     };
-  }, []);
+  }, [activeProject]);
 
   return state;
 }
