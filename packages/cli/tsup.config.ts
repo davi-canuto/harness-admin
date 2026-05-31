@@ -6,5 +6,20 @@ export default defineConfig({
   dts: false,
   clean: true,
   banner: { js: "#!/usr/bin/env node" },
-  external: ["@harness/server", "@harness/tui"],
+  // inline workspace packages (not on npm), keep third-party deps external
+  noExternal: ["@harness/server", "@harness/tui", "@harness/parser"],
+  external: [
+    "open",
+    "fastify",
+    "@fastify/websocket",
+    "@fastify/static",
+    "chokidar",
+    "gray-matter",
+    "ink",
+    "react",
+    "react-devtools-core",
+    // node builtins
+    "fs", "path", "url", "module", "events", "stream", "net", "http", "https",
+    "os", "crypto", "buffer", "util", "assert", "child_process", "worker_threads",
+  ],
 });
