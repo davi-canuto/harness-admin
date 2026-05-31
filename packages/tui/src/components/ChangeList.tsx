@@ -30,6 +30,7 @@ export function ChangeList({ changes, selectedId, archivedOpen, width }: ChangeL
   for (const c of changes) byStatus[c.status].push(c);
 
   const maxName = width - 4;
+  const maxChildName = width - 6;
 
   return (
     <Box flexDirection="column" width={width} paddingX={1}>
@@ -55,13 +56,32 @@ export function ChangeList({ changes, selectedId, archivedOpen, width }: ChangeL
                   : change.name;
 
               return (
-                <Text
-                  key={change.id}
-                  color={isSelected ? "cyan" : STATUS_COLOR[status]}
-                  bold={isSelected}
-                >
-                  {isSelected ? "▶ " : "  "}{name}
-                </Text>
+                <Box key={change.id} flexDirection="column">
+                  <Text
+                    color={isSelected ? "cyan" : STATUS_COLOR[status]}
+                    bold={isSelected}
+                  >
+                    {isSelected ? "▶ " : "  "}{name}
+                    {change.children ? <Text color="gray"> ▸</Text> : null}
+                  </Text>
+
+                  {change.children && change.children.map((child) => {
+                    const isChildSelected = child.id === selectedId;
+                    const childName =
+                      child.name.length > maxChildName
+                        ? child.name.slice(0, maxChildName - 1) + "…"
+                        : child.name;
+                    return (
+                      <Text
+                        key={child.id}
+                        color={isChildSelected ? "cyan" : "gray"}
+                        bold={isChildSelected}
+                      >
+                        {isChildSelected ? "  ▶ " : "    "}{childName}
+                      </Text>
+                    );
+                  })}
+                </Box>
               );
             })}
 

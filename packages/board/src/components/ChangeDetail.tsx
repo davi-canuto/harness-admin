@@ -2,6 +2,7 @@ import type { Change } from "../types.ts";
 import { StatusBadge } from "./StatusBadge.tsx";
 import { ProgressBar } from "./ProgressBar.tsx";
 import { TaskList } from "./TaskList.tsx";
+import { ParentDetail } from "./ParentDetail.tsx";
 
 const ARTIFACTS = [
   { key: "hasProposal" as const, label: "proposal.md" },
@@ -9,7 +10,10 @@ const ARTIFACTS = [
   { key: "hasTasks"    as const, label: "tasks.md"    },
 ];
 
-export function ChangeDetail({ change }: { change: Change }) {
+export function ChangeDetail({ change, onSelectChild }: { change: Change; onSelectChild: (id: string) => void }) {
+  if (change.children) {
+    return <ParentDetail change={change} onSelectChild={onSelectChild} />;
+  }
   return (
     <div className="flex flex-col gap-5 p-6 h-full overflow-y-auto">
       <div>

@@ -20,10 +20,50 @@ const MIN_WIDTH = 200;
 const MAX_WIDTH = 520;
 const DEFAULT_WIDTH = 288;
 
+function ChangeRow({
+  change,
+  selectedId,
+  onSelect,
+  indent = false,
+}: {
+  change: Change;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  indent?: boolean;
+}) {
+  const isSelected = selectedId === change.id;
+  return (
+    <button
+      onClick={() => onSelect(change.id)}
+      className={`w-full flex items-center justify-between py-2 text-sm gap-3 border-l-2 transition-colors text-left ${
+        indent ? "pl-8 pr-4" : "px-4"
+      } ${
+        isSelected
+          ? "border-blue-400 bg-zinc-800/60 text-zinc-100"
+          : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30"
+      }`}
+    >
+      <span className="flex-1 break-words leading-snug">{change.name}</span>
+      {change.totalTasks > 0 && (
+        <span className="text-[11px] text-zinc-600 tabular-nums shrink-0">
+          {change.completedTasks}/{change.totalTasks}
+        </span>
+      )}
+    </button>
+  );
+}
+
 export function Sidebar({ changes, selectedId, onSelect }: SidebarProps) {
   const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [collapsed, setCollapsed] = useState<Partial<Record<Status, boolean>>>({
     archived: true,
+  });
+  const [expandedParents, setExpandedParents] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    for (const c of changes) {
+      if (c.children && c.status === "in_progress") initial.add(c.id);
+    }
+    return initial;
   });
   const dragging = useRef(false);
   const startX = useRef(0);
@@ -56,6 +96,14 @@ export function Sidebar({ changes, selectedId, onSelect }: SidebarProps) {
 
   const toggleSection = (status: Status) => {
     setCollapsed((prev) => ({ ...prev, [status]: !prev[status] }));
+  };
+
+  const toggleParent = (id: string) => {
+    setExpandedParents((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
   };
 
   const counts: Record<Status, number> = {
@@ -106,31 +154,49 @@ export function Sidebar({ changes, selectedId, onSelect }: SidebarProps) {
                   <ChevronIcon open={isOpen} />
                 </button>
 
-                {isOpen && items.map((change) => (
-                  <button
-                    key={change.id}
-                    onClick={() => onSelect(change.id)}
-                    className={`w-full flex items-center justify-between px-4 py-2 text-sm gap-3 border-l-2 transition-colors text-left ${
-                      selectedId === change.id
-                        ? "border-blue-400 bg-zinc-800/60 text-zinc-100"
-                        : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30"
-                    }`}
-                  >
-                    <span className="flex-1 break-words leading-snug">{change.name}</span>
-                    {change.totalTasks > 0 && (
-                      <span className="text-[11px] text-zinc-600 tabular-nums shrink-0">
-                        {change.completedTasks}/{change.totalTasks}
-                      </span>
-                    )}
-                  </button>
-                ))}
+                {isOpen && items.map((change) => {
+                  if (change.children) {
+                    const parentOpen = expandedParents.has(change.id);
+                    return (
+                      <div key={change.id}>
+                        <button
+                          onClick={() => toggleParent(change.id)}
+                          className={`w-full flex items-center justify-between px-4 py-2 text-sm gap-3 border-l-2 transition-colors text-left border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30`}
+                        >
+                          <span className="flex-1 break-words leading-snug font-medium">{change.name}</span>
+                          <span className="text-[11px] text-zinc-600 tabular-nums shrink-0 mr-1">
+                            {change.completedTasks}/{change.totalTasks}
+                          </span>
+                          <ChevronIcon open={parentOpen} />
+                        </button>
+                        {parentOpen && change.children.map((child) => (
+                          <ChangeRow
+                            key={child.id}
+                            change={child}
+                            selectedId={selectedId}
+                            onSelect={onSelect}
+                            indent
+                          />
+                        ))}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <ChangeRow
+                      key={change.id}
+                      change={change}
+                      selectedId={selectedId}
+                      onSelect={onSelect}
+                    />
+                  );
+                })}
               </div>
             );
           })}
         </nav>
       </div>
 
-      {/* Resize handle */}
       <div
         onMouseDown={onMouseDown}
         className="sidebar-resize-handle absolute top-0 right-0 w-1 h-full transition-colors"

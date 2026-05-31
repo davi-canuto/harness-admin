@@ -4,11 +4,12 @@ import { parseTasks } from "./parser.js";
 import { classifyStatus } from "./classifier.js";
 import type { Change, Config } from "./types.js";
 
-function buildChange(
+function buildLeafChange(
   entry: string,
   fullPath: string,
   archivePath: string,
-  config: Config
+  config: Config,
+  isChild = false
 ): Change {
   const tasksPath = join(fullPath, config.tasksFile);
   const proposalPath = join(fullPath, config.proposalFile);
@@ -19,7 +20,7 @@ function buildChange(
   const status = classifyStatus(fullPath, archivePath, tasks);
 
   return {
-    id: entry,
+    id: isChild ? `${entry}__child` : entry,
     name: entry,
     path: fullPath,
     status,
@@ -30,6 +31,7 @@ function buildChange(
     hasProposal: existsSync(proposalPath),
     hasDesign: existsSync(designPath),
     hasTasks: existsSync(tasksPath),
+    ...(isChild ? { isChild: true } : {}),
   };
 }
 
@@ -47,6 +49,44 @@ function listDirs(dir: string): string[] {
   }
 }
 
+function buildParentChange(
+  entry: string,
+  fullPath: string,
+  archivePath: string,
+  config: Config
+): Change {
+  const proposalPath = join(fullPath, config.proposalFile);
+  const designPath = join(fullPath, config.designFile);
+
+  const childDirs = listDirs(fullPath).filter((child) =>
+    existsSync(join(fullPath, child, config.tasksFile))
+  );
+
+  const children: Change[] = childDirs.map((child) =>
+    buildLeafChange(child, join(fullPath, child), archivePath, config, true)
+  );
+
+  const totalTasks = children.reduce((sum, c) => sum + c.totalTasks, 0);
+  const completedTasks = children.reduce((sum, c) => sum + c.completedTasks, 0);
+  const syntheticTasks = children.flatMap((c) => c.tasks);
+  const status = classifyStatus(fullPath, archivePath, syntheticTasks);
+
+  return {
+    id: entry,
+    name: entry,
+    path: fullPath,
+    status,
+    tasks: [],
+    totalTasks,
+    completedTasks,
+    progress: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+    hasProposal: existsSync(proposalPath),
+    hasDesign: existsSync(designPath),
+    hasTasks: false,
+    children,
+  };
+}
+
 export function readChanges(rootDir: string, config: Config): Change[] {
   const changesPath = join(rootDir, config.changesDir);
   const archivePath = resolve(join(rootDir, config.archiveDir));
@@ -61,12 +101,23 @@ export function readChanges(rootDir: string, config: Config): Change[] {
     const fullPath = join(changesPath, entry);
 
     if (resolve(fullPath) === archivePath) {
-      // this entry IS the archive dir — scan one level inside it
       for (const archivedEntry of listDirs(fullPath)) {
-        changes.push(buildChange(archivedEntry, join(fullPath, archivedEntry), archivePath, config));
+        changes.push(
+          buildLeafChange(archivedEntry, join(fullPath, archivedEntry), archivePath, config)
+        );
       }
+      continue;
+    }
+
+    const hasOwnTasks = existsSync(join(fullPath, config.tasksFile));
+    const childrenWithTasks = listDirs(fullPath).filter((child) =>
+      existsSync(join(fullPath, child, config.tasksFile))
+    );
+
+    if (!hasOwnTasks && childrenWithTasks.length > 0) {
+      changes.push(buildParentChange(entry, fullPath, archivePath, config));
     } else {
-      changes.push(buildChange(entry, fullPath, archivePath, config));
+      changes.push(buildLeafChange(entry, fullPath, archivePath, config));
     }
   }
 

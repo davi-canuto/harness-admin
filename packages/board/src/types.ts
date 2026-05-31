@@ -18,4 +18,6 @@ export interface Change {
   hasProposal: boolean;
   hasDesign: boolean;
   hasTasks: boolean;
+  children?: Change[];
+  isChild?: boolean;
 }

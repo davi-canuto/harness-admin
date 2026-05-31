@@ -9,7 +9,11 @@ export default function App() {
   const { changes, loading, error } = useChanges();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const selected = changes.find((c) => c.id === selectedId) ?? null;
+  // look in top-level changes and inside children
+  const selected =
+    changes.find((c) => c.id === selectedId) ??
+    changes.flatMap((c) => c.children ?? []).find((c) => c.id === selectedId) ??
+    null;
 
   const counts: Record<Status, number> = {
     backlog: 0, in_progress: 0, done: 0, archived: 0,
@@ -37,7 +41,7 @@ export default function App() {
       <Sidebar changes={changes} selectedId={selectedId} onSelect={setSelectedId} />
       <main className="flex-1 h-full overflow-hidden">
         {selected ? (
-          <ChangeDetail change={selected} />
+          <ChangeDetail change={selected} onSelectChild={setSelectedId} />
         ) : (
           <EmptyState counts={counts} />
         )}

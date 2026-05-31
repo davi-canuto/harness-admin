@@ -25,12 +25,18 @@ export function App({ changes }: AppProps) {
     return first?.id ?? changes[0]?.id ?? null;
   });
 
-  // Flat navigable list (only change items, no headers)
+  // Flat navigable list — children are navigable individually, parents are skipped
   const navList = useMemo(() => {
     const result: Change[] = [];
     for (const status of SECTION_ORDER) {
       if (status === "archived" && !archivedOpen) continue;
-      result.push(...changes.filter((c) => c.status === status));
+      for (const change of changes.filter((c) => c.status === status)) {
+        if (change.children) {
+          result.push(...change.children);
+        } else {
+          result.push(change);
+        }
+      }
     }
     return result;
   }, [changes, archivedOpen]);
@@ -54,7 +60,10 @@ export function App({ changes }: AppProps) {
     }
   });
 
-  const selected = changes.find((c) => c.id === selectedId) ?? null;
+  const selected =
+    changes.find((c) => c.id === selectedId) ??
+    changes.flatMap((c) => c.children ?? []).find((c) => c.id === selectedId) ??
+    null;
 
   return (
     <Box flexDirection="column" height="100%">
