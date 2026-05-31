@@ -1,61 +1,77 @@
-import React, { useState, useEffect } from "react";
-import { Box, Text, useInput } from "ink";
-import type { Change } from "./types.js";
+import React, { useState, useMemo } from "react";
+import { Box, useInput, useStdout } from "ink";
+import type { Change, Status } from "./types.js";
+import { ChangeList } from "./components/ChangeList.js";
+import { ChangeDetail } from "./components/ChangeDetail.js";
+import { KeyHints } from "./components/KeyHints.js";
 
 interface AppProps {
   changes: Change[];
 }
 
-export function App({ changes }: AppProps) {
-  const [cursor, setCursor] = useState(0);
-  const selected = changes[cursor] ?? null;
+const SECTION_ORDER: Status[] = ["in_progress", "backlog", "done", "archived"];
 
-  useInput((_, key) => {
-    if (key.upArrow) setCursor((c) => Math.max(0, c - 1));
-    if (key.downArrow) setCursor((c) => Math.min(changes.length - 1, c + 1));
+export function App({ changes }: AppProps) {
+  const { stdout } = useStdout();
+  const termWidth = stdout?.columns ?? 160;
+  const listWidth = 34;
+  const detailWidth = Math.max(60, termWidth - listWidth - 2);
+
+  const [archivedOpen, setArchivedOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(() => {
+    const first = changes.find(
+      (c) => c.status === "in_progress" || c.status === "backlog"
+    );
+    return first?.id ?? changes[0]?.id ?? null;
   });
 
-  return (
-    <Box flexDirection="row" height="100%">
-      <Box
-        flexDirection="column"
-        width={30}
-        borderStyle="single"
-        borderColor="gray"
-        paddingX={1}
-      >
-        <Text bold color="white">
-          Harness Admin
-        </Text>
-        <Text color="gray">──────────────────</Text>
-        {changes.map((c, i) => (
-          <Text key={c.id} color={i === cursor ? "cyan" : "gray"}>
-            {i === cursor ? "> " : "  "}
-            {c.name}
-          </Text>
-        ))}
-      </Box>
+  // Flat navigable list (only change items, no headers)
+  const navList = useMemo(() => {
+    const result: Change[] = [];
+    for (const status of SECTION_ORDER) {
+      if (status === "archived" && !archivedOpen) continue;
+      result.push(...changes.filter((c) => c.status === status));
+    }
+    return result;
+  }, [changes, archivedOpen]);
 
-      <Box flexDirection="column" flexGrow={1} borderStyle="single" borderColor="gray" paddingX={1}>
-        {selected ? (
-          <>
-            <Text bold color="white">
-              {selected.name}
-            </Text>
-            <Text color="gray">
-              Status: {selected.status}  {selected.completedTasks}/{selected.totalTasks} tasks ({selected.progress}%)
-            </Text>
-            <Text color="gray">──────────────────</Text>
-            {selected.tasks.map((t) => (
-              <Text key={t.id} color={t.completed ? "green" : "gray"}>
-                {t.completed ? "✓" : "○"} {t.label}
-              </Text>
-            ))}
-          </>
-        ) : (
-          <Text color="gray">No change selected</Text>
-        )}
+  const cursorIndex = navList.findIndex((c) => c.id === selectedId);
+
+  useInput((input, key) => {
+    const up = key.upArrow || input === "k";
+    const down = key.downArrow || input === "j";
+
+    if (up) {
+      const next = Math.max(0, cursorIndex - 1);
+      setSelectedId(navList[next]?.id ?? selectedId);
+    } else if (down) {
+      const next = Math.min(navList.length - 1, cursorIndex + 1);
+      setSelectedId(navList[next]?.id ?? selectedId);
+    } else if (input === "a") {
+      setArchivedOpen((o) => !o);
+    } else if (input === "q" || key.escape) {
+      process.exit(0);
+    }
+  });
+
+  const selected = changes.find((c) => c.id === selectedId) ?? null;
+
+  return (
+    <Box flexDirection="column" height="100%">
+      <Box flexGrow={1}>
+        <ChangeList
+          changes={changes}
+          selectedId={selectedId}
+          archivedOpen={archivedOpen}
+          width={listWidth}
+        />
+        <Box borderLeft borderStyle="single" borderColor="gray" flexGrow={1}>
+          {selected && (
+            <ChangeDetail change={selected} width={detailWidth} />
+          )}
+        </Box>
       </Box>
+      <KeyHints />
     </Box>
   );
 }
