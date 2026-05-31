@@ -1,0 +1,80 @@
+import { useEffect, useReducer, useRef } from "react";
+import type { Change } from "../types.ts";
+
+type State = {
+  changes: Change[];
+  loading: boolean;
+  error: string | null;
+};
+
+type Action =
+  | { type: "snapshot"; changes: Change[] }
+  | { type: "change_added"; change: Change }
+  | { type: "change_updated"; change: Change }
+  | { type: "change_removed"; id: string }
+  | { type: "error"; message: string };
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "snapshot":
+      return { changes: action.changes, loading: false, error: null };
+    case "change_added":
+      return { ...state, changes: [...state.changes, action.change] };
+    case "change_updated":
+      return {
+        ...state,
+        changes: state.changes.map((c) =>
+          c.id === action.change.id ? action.change : c
+        ),
+      };
+    case "change_removed":
+      return {
+        ...state,
+        changes: state.changes.filter((c) => c.id !== action.id),
+      };
+    case "error":
+      return { ...state, loading: false, error: action.message };
+    default:
+      return state;
+  }
+}
+
+export function useChanges() {
+  const [state, dispatch] = useReducer(reducer, {
+    changes: [],
+    loading: true,
+    error: null,
+  });
+  const wsRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    function connect() {
+      if (cancelled) return;
+      const ws = new WebSocket(`ws://${location.host}/ws`);
+      wsRef.current = ws;
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data as string);
+        dispatch(msg);
+      };
+
+      ws.onerror = () => {
+        dispatch({ type: "error", message: "WebSocket connection failed" });
+      };
+
+      ws.onclose = () => {
+        if (!cancelled) setTimeout(connect, 2000);
+      };
+    }
+
+    connect();
+    return () => {
+      cancelled = true;
+      wsRef.current?.close();
+    };
+  }, []);
+
+  return state;
+}
